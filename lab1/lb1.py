@@ -1,3 +1,6 @@
-import cv2
-print(cv2.__version__)
+import cv2 as cv
+print(cv.__version__)
 
+tuta_image = cv.imread("input/tytuta.jpg")
+cv.imshow('output', tuta_image)
+cv.waitKey(0)
