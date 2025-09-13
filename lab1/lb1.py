@@ -131,10 +131,23 @@ def CV_WEBCAM():
     video_writer.release()
     cv.destroyAllWindows()
 
+def CV_IP_CAMERA():
+    ip = "http://127.0.0.1:8080/video"
+    camera = cv.VideoCapture(ip)
+    cv.namedWindow("img", cv.WINDOW_FREERATIO)
+    while True:
+        ok, img = camera.read()
+        if not ok:
+            break
+        cv.imshow("img", img)
+        if cv.waitKey(1) & 0xFF == 27:
+            break
+
 if __name__ == "__main__":
     # CVImage()
     # CVImageForm()
     # CVideCapture()
     # readIPWriteTOFile()
     # CV_IMAGE_COMPARE_HSV()
-    CV_WEBCAM()
+    # CV_WEBCAM()
+    CV_IP_CAMERA()
