@@ -100,15 +100,27 @@ def CV_WEBCAM():
     while ok:
         ok, img = camera.read()
         # cv.line(img, (centerX - 20, centerY), (centerX + 20, centerY), (0, 0, 255), 2)
+        b, g, r = int(img[centerY, centerX, 0]), int(img[centerY, centerX, 1]), int(img[centerY, centerX, 2])
+        
+        dist_red   = (r - 255)**2 + (g - 0)**2   + (b - 0)**2
+        dist_green = (r - 0)**2   + (g - 255)**2 + (b - 0)**2
+        dist_blue  = (r - 0)**2   + (g - 0)**2   + (b - 255)**2
+        if dist_red <= dist_green and dist_red <= dist_blue:
+            fill = (0, 0, 255)    # красный (B,G,R)
+        elif dist_green <= dist_red and dist_green <= dist_blue:
+            fill = (0, 255, 0)
+        else:
+            fill = (255, 0, 0)
+
         cv.rectangle(img,
                      (centerX - vertical_w//2, centerY - vertical_h//2),
                      (centerX + vertical_w//2, centerY + vertical_h//2),
-                     color, thickness=thickness, lineType=cv.LINE_AA)
+                     fill, thickness=-1, lineType=cv.LINE_AA)
 
         cv.rectangle(img,
                      (centerX - horizont_w//2, centerY - horizont_h//2),
                      (centerX + horizont_w//2, centerY + horizont_h//2),
-                     color, thickness=thickness, lineType=cv.LINE_AA)
+                     fill, thickness=-1, lineType=cv.LINE_AA)
 
         cv.imshow("img", img)
         video_writer.write(img)
