@@ -93,21 +93,16 @@ def CV_WEBCAM():
 
     centerX = weight // 2
     centerY = height // 2
-    vertical_w, vertical_h = max(40, weight//12), height//3
-    horizont_w, horizont_h = weight//2, max(40, height//12)
-    color, thickness = (0,0,255), 1
+    vertical_w, vertical_h = max(1, weight//50), height//3
+    horizont_w, horizont_h = weight//3, max(1, height//50)
 
     while ok:
         ok, img = camera.read()
         # cv.line(img, (centerX - 20, centerY), (centerX + 20, centerY), (0, 0, 255), 2)
-        b, g, r = int(img[centerY, centerX, 0]), int(img[centerY, centerX, 1]), int(img[centerY, centerX, 2])
-        
-        dist_red   = (r - 255)**2 + (g - 0)**2   + (b - 0)**2
-        dist_green = (r - 0)**2   + (g - 255)**2 + (b - 0)**2
-        dist_blue  = (r - 0)**2   + (g - 0)**2   + (b - 255)**2
-        if dist_red <= dist_green and dist_red <= dist_blue:
-            fill = (0, 0, 255)    # красный (B,G,R)
-        elif dist_green <= dist_red and dist_green <= dist_blue:
+        b, g, r = img[centerY, centerX]
+        if r > g and r > b:
+            fill = (0, 0, 255)
+        elif g > r and g > b:
             fill = (0, 255, 0)
         else:
             fill = (255, 0, 0)
@@ -131,22 +126,69 @@ def CV_WEBCAM():
     video_writer.release()
     cv.destroyAllWindows()
 
+# ...existing code...
 def CV_IP_CAMERA():
+    #adb kill-server
+    # adb forward tcp:8080 tcp:8080
     ip = "http://127.0.0.1:8080/video"
     camera = cv.VideoCapture(ip)
-    cv.namedWindow("img", cv.WINDOW_FREERATIO)
+    cv.namedWindow("IP Camera", cv.WINDOW_FREERATIO)
     while True:
         ok, img = camera.read()
         if not ok:
             break
-        cv.imshow("img", img)
+
+        weight = int(camera.get(cv.CAP_PROP_FRAME_WIDTH))
+        height = int(camera.get(cv.CAP_PROP_FRAME_HEIGHT))
+        centerX = weight // 2
+        centerY = height // 2
+
+        b, g, r = img[centerY, centerX]
+        if r > g and r > b:
+            middle_color = (0, 0, 255)
+        elif g > r and g > b:
+            middle_color = (0, 255, 0)
+        else:
+            middle_color = (255, 0, 0)
+
+        flag_w = max(60, weight // 4)
+        flag_h = max(30, height // 8)
+        flag_x1 = centerX - flag_w // 2
+        flag_y1 = centerY - flag_h // 2
+        flag_x2 = flag_x1 + flag_w
+        flag_y2 = flag_y1 + flag_h
+
+        stripe_h = flag_h // 3
+
+        cv.rectangle(img,
+                     (flag_x1, flag_y1),
+                     (flag_x2, flag_y1 + stripe_h),
+                     (0, 0, 0),
+                     thickness=-1, lineType=cv.LINE_AA)
+
+        cv.rectangle(img,
+                     (flag_x1, flag_y1 + stripe_h),
+                     (flag_x2, flag_y1 + 2 * stripe_h),
+                     middle_color,
+                     thickness=-1, lineType=cv.LINE_AA)
+        
+        cv.rectangle(img,
+                     (flag_x1, flag_y1 + 2 * stripe_h),
+                     (flag_x2, flag_y2),
+                     (0, 255, 0),
+                     thickness=-1, lineType=cv.LINE_AA)
+
+        cv.imshow("IP Camera", img)
         if cv.waitKey(1) & 0xFF == 27:
             break
+
+    camera.release()
+    cv.destroyAllWindows()
 
 if __name__ == "__main__":
     # CVImage()
     # CVImageForm()
-    # CVideCapture()
+    # CVideCapture()    
     # readIPWriteTOFile()
     # CV_IMAGE_COMPARE_HSV()
     # CV_WEBCAM()
