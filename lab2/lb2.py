@@ -82,7 +82,6 @@ def task4():
         treshold = cv.inRange(HSV, low_color_blue, high_color_blue)
         erosia  = cv.erode(treshold, core)
         all_morfologic = cv.dilate(erosia, core)
-        cv.imshow("Default", img)
         cv.imshow("All", all_morfologic)
 
         moments = cv.moments(treshold)
@@ -91,8 +90,19 @@ def task4():
         M10 = moments['m10']
         center_weighted_X = int(M10 / S) if S != 0 else 0
         center_weighted_Y = int(M01 / S) if S != 0 else 0
-        info_display = np.zeros((200, 400, 3), dtype=np.uint8)
+        cv.circle(img, center=(center_weighted_X, center_weighted_Y), radius=4, color=(0, 255, 0), thickness=-1)
 
+        contours, _ = cv.findContours(all_morfologic, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+
+        if contours:
+            largest_contour = max(contours, key=cv.contourArea)
+
+            x, y, w, h = cv.boundingRect(largest_contour)
+
+            cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 0), 2)
+
+        cv.imshow("Default", img)
+        info_display = np.zeros((200, 400, 3), dtype=np.uint8)
         cv.putText(info_display, f"S: {S}", (10, 30),
                     cv.FONT_HERSHEY_COMPLEX, 0.7, (120, 0, 0), 2)
         cv.putText(info_display, f"M01 (X * intensity): {M01}", (10, 70),
