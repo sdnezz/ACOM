@@ -26,18 +26,49 @@ def task2():
 
         HSV = cv.cvtColor(img, cv.COLOR_BGR2HSV)
 
-        low_color_red = np.array((100, 90, 100))
-        high_color_red = np.array((140, 190, 190))
+        low_color_blue = np.array((100, 90, 100))
+        high_color_blue = np.array((140, 190, 190))
 
-        treshold = cv.inRange(HSV, low_color_red, high_color_red)
+        treshold = cv.inRange(HSV, low_color_blue, high_color_blue)
 
         cv.imshow("Default", img)
-        cv.imshow("only Red", treshold)
+        cv.imshow("only BLUE", treshold)
 
+        if cv.waitKey(1) & 0xFF == 27:
+            break
+
+def task3():
+    core = np.ones((3, 3), np.uint8)
+    while camera.isOpened():
+        ok, img = camera.read()
+        if not(ok):
+            break
+
+        HSV = cv.cvtColor(img, cv.COLOR_BGR2HSV)
+
+        low_color_blue = np.array((100, 90, 100))
+        high_color_blue = np.array((140, 190, 190))
+
+        treshold = cv.inRange(HSV, low_color_blue, high_color_blue)
+
+        cv.imshow("Default", img)
+        cv.imshow("BLUE", treshold)
+
+        erosia  = cv.erode(treshold, core)
+        dilatation = cv.dilate(treshold, core)
+
+        cv.imshow("ERODE", erosia)
+        cv.imshow("DILATE", dilatation)
+
+        all_morfologic = cv.dilate(erosia, core)
+
+        cv.imshow("All", all_morfologic)
         if cv.waitKey(1) & 0xFF == 27:
             break
 
 if __name__ == "__main__":
     # task1()
-    task2()
+    # task2()
+    # task3()
+    
     camera.release()
