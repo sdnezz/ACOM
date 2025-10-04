@@ -8,7 +8,10 @@ def gaussian_kernel(size, sigma):
     for x in range(size):
         for y in range(size):
             kernel[x, y] = (1 / (2 * np.pi * sigma**2)) * np.exp(-((x-center)**2 + (y-center)**2)) / (2 * sigma**2)
-
+    
+    kernel /= kernel.sum()
+    kernel = kernel / kernel.sum()
+    print(kernel.sum())
     return kernel
 
 if __name__ == "__main__":
