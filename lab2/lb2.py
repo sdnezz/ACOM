@@ -130,16 +130,19 @@ def task5():
         M10 = moments['m10']
         center_weighted_X = int(M10 / S) if S != 0 else 0
         center_weighted_Y = int(M01 / S) if S != 0 else 0
-        cv.circle(img, center=(center_weighted_X, center_weighted_Y), radius=4, color=(0, 255, 0), thickness=-1)
 
-        contours, _ = cv.findContours(all_morfologic, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+        white_pixels = np.argwhere(all_morfologic == 255)
 
-        if contours:
-            largest_contour = max(contours, key=cv.contourArea)
+        if white_pixels.size > 0:
+            min_x, min_y = white_pixels.min(axis=0)
+            max_x, max_y = white_pixels.max(axis=0)
 
-            x, y, w, h = cv.boundingRect(largest_contour)
+            cv.rectangle(img, (min_y, min_x), (max_y, max_x), (0, 255, 0), 2)
 
-            cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 0), 2)
+            center_x = (min_x + max_x) // 2
+            center_y = (min_y + max_y) // 2
+
+            cv.circle(img, (center_y, center_x), 4, (0, 0, 255), -1)
 
         cv.imshow("Default", img)
         info_display = np.zeros((200, 400, 3), dtype=np.uint8)
