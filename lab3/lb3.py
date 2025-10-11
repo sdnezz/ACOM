@@ -42,8 +42,9 @@ if __name__ == "__main__":
 
             image = cv.imread("lab1/input/tytuta.jpg", cv.IMREAD_GRAYSCALE)
             filtered_image = apply_gaussian_filter(image, kernel)
-
+            filtered_image_opencv = cv.GaussianBlur(image, (size, size), sigma)
             cv.imshow("Original", image)
             cv.imshow("Gaussian Filtered", filtered_image)
+            cv.imshow("Gaussian Filtered (OpenCV)", filtered_image_opencv)
         cv.waitKey(0)
         cv.destroyAllWindows()
