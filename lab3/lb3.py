@@ -26,26 +26,24 @@ def apply_gaussian_filter(image, kernel):
 
     will_filtered_empty_image = np.zeros_like(image, dtype=np.float64)
 
-    # Применяем фильтр Гаусса
     for i in range(image.shape[0]):
         for j in range(image.shape[1]):
-            region = padded_image[i:i+kernel_size, j:j+kernel_size]
-            will_filtered_empty_image[i, j] = np.sum(region * kernel)
+            window = padded_image[i:i+kernel_size, j:j+kernel_size]
+            will_filtered_empty_image[i, j] = np.sum(window * kernel)
 
     return np.clip(will_filtered_empty_image, 0, 255).astype(np.uint8)
 
 
 if __name__ == "__main__":
-    # for size in [3, 5, 7]:
-    #     kernel = gaussian_kernel(size, sigma=1)
-    #     print(f"Гауссова матрица для размера {size}x{size}:\n", kernel)
+    for size in [3, 7]:
+        for sigma in [1, 3]:
+            kernel = gaussian_kernel(size, sigma=sigma)
+            print(f"Гауссова матрица для размера {size}x{size} и сигмы {sigma}:\n", kernel)
 
-    kernel = gaussian_kernel(size=5, sigma=1)
-    
-    image = cv.imread("lab1/input/tytuta.jpg", cv.IMREAD_GRAYSCALE)
-    filtered_image = apply_gaussian_filter(image, kernel)
+            image = cv.imread("lab1/input/tytuta.jpg", cv.IMREAD_GRAYSCALE)
+            filtered_image = apply_gaussian_filter(image, kernel)
 
-    cv.imshow("Original", image)
-    cv.imshow("Gaussian Filtered", filtered_image)
-    cv.waitKey(0)
-    cv.destroyAllWindows()
+            cv.imshow("Original", image)
+            cv.imshow("Gaussian Filtered", filtered_image)
+        cv.waitKey(0)
+        cv.destroyAllWindows()
