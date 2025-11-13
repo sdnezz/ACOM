@@ -29,12 +29,43 @@ def gradient_intensity(image):
     difference_way = np.arctan2(grad_y, grad_x)
     return vector_length, difference_way
 
+def non_maximum_suppression(vec_lenght, dif_way):
+    suppressed = np.zeros_like(vec_lenght, dtype=np.float32)
+    angle = dif_way * 180.0 / np.pi
+    angle[angle < 0] += 180
+
+    for i in range(1, vec_lenght.shape[0] - 1):
+        for j in range(1, dif_way.shape[1] - 1):
+            q = 255
+            r = 255
+
+            if (0 <= angle[i, j] < 22.5) or (157.5 <= angle[i, j] <= 180):
+                q = vec_lenght[i, j + 1]
+                r = vec_lenght[i, j - 1]
+            elif 22.5 <= angle[i, j] < 67.5:
+                q = vec_lenght[i + 1, j - 1]
+                r = vec_lenght[i - 1, j + 1]
+            elif 67.5 <= angle[i, j] < 112.5:
+                q = vec_lenght[i + 1, j]
+                r = vec_lenght[i - 1, j]
+            elif 112.5 <= angle[i, j] < 157.5:
+                q = vec_lenght[i - 1, j - 1]
+                r = vec_lenght[i + 1, j + 1]
+
+            if vec_lenght[i, j] >= q and vec_lenght[i, j] >= r:
+                suppressed[i, j] = vec_lenght[i, j]
+            else:
+                suppressed[i, j] = 0
+
+    return suppressed
+
 if __name__ == "__main__":
-    image = cv.imread("lab4/input/gelenzhik.jpg", cv.IMREAD_GRAYSCALE)
+    image = cv.imread("lab4/input/gelenzhik.jpg")
+    image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     sigma, size = 1,3
     filtered_image = cv.GaussianBlur(image, (size, size), sigma)
     vector_length, difference_way = gradient_intensity(filtered_image)
-    
+
 
     cv.namedWindow('Original', cv.WINDOW_FREERATIO)
     cv.namedWindow('Gaussian Filtered', cv.WINDOW_FREERATIO)
