@@ -7,17 +7,17 @@ def gradient_intensity(image):
         [-1,0,1],
         [-2,0,2],
         [-1,0,1]
-    ])
+    ], dtype=np.float32)
     sobel_y = np.array([
         [-1,-2,-1],
         [0,0,0],
         [1,2,1]
-    ])
+    ], dtype=np.float32)
 
     padded = np.pad(image, pad_width=1, mode='edge')
     rows, cols = image.shape
-    grad_x = np.zeros_like(image)
-    grad_y = np.zeros_like(image)
+    grad_x = np.zeros_like(image, dtype=np.float32)
+    grad_y = np.zeros_like(image, dtype=np.float32)
 
     for i in range(rows):
         for j in range(cols):
@@ -30,7 +30,7 @@ def gradient_intensity(image):
     return vector_length, vector_angle
 
 def non_maximum_suppression(vec_lenght, vec_angle):
-    suppressed = np.zeros_like(vec_lenght)
+    suppressed = np.zeros_like(vec_lenght, dtype=np.float32)
     angle = vec_angle * 180.0 / np.pi
     angle[angle < 0] += 180
 
