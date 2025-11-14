@@ -26,7 +26,7 @@ def gradient_intensity(image):
             grad_y[i, j] = np.sum(roi * sobel_y)
 
     vector_length = np.sqrt(grad_x**2+grad_y**2)
-    vector_angle = np.tan(grad_y, grad_x)
+    vector_angle = np.arctan2(grad_y, grad_x)
     return vector_length, vector_angle
 
 def non_maximum_suppression(vec_lenght, vec_angle):
@@ -68,9 +68,21 @@ def double_threshold(suppressed_image, low_level, high_level):
     strong = suppressed_image >= high_level
     weak = (suppressed_image >= low_level) & (suppressed_image < high_level)
 
-    edges = np.zeros_like(suppressed_image, dtype=np.uint8)
-    edges[strong] = 255
-    edges[weak] = 75
+    ways = np.zeros_like(suppressed_image, dtype=np.uint8)
+    ways[strong] = 255
+    ways[weak] = 75
+    return ways
+
+def hysteresis(edges):
+    rows, cols = edges.shape
+    for i in range(1, rows - 1):
+        for j in range(1, cols - 1):
+            if edges[i, j] == 75:
+                if np.any(edges[i-1 : i+2, j-1 : j+2] == 255):
+                    edges[i, j] = 255
+                else:
+                    edges[i, j] = 0
+
     return edges
 
 if __name__ == "__main__":
@@ -81,11 +93,17 @@ if __name__ == "__main__":
     vector_length, vector_angle = gradient_intensity(filtered_image)
     suppressed_image, low_lvl, high_lvl = non_maximum_suppression(vector_length, vector_angle)
     ways = double_threshold(suppressed_image, low_lvl, high_lvl)
-    
+    edges = hysteresis(ways)
 
+    cv.imwrite("lab4/output/Canny_detect-gelenzhik.jpg", edges)
+    cv.imwrite("lab4/output/cv_canny-gelenzhik.jpg", cv.Canny(image, 100, 150))
+    image_canny = cv.imread("lab4/output/Canny_detect-gelenzhik.jpg")
+    image_canny_cv = cv.imread("lab4/output/cv_canny-gelenzhik.jpg")
     cv.namedWindow('Original', cv.WINDOW_FREERATIO)
-    cv.namedWindow('Gaussian Filtered', cv.WINDOW_FREERATIO)
+    cv.namedWindow('Canny', cv.WINDOW_FREERATIO)
+    cv.namedWindow("OpenCV", cv.WINDOW_FREERATIO)
     cv.imshow("Original", image)
-    cv.imshow("Gaussian Filtered", filtered_image)
+    cv.imshow("Canny", image_canny)
+    cv.imshow("OpenCV", image_canny_cv)
     cv.waitKey(0)
     cv.destroyAllWindows()
