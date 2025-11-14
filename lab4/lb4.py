@@ -16,8 +16,8 @@ def gradient_intensity(image):
 
     padded = np.pad(image, pad_width=1, mode='edge')
     rows, cols = image.shape
-    grad_x = np.zeros_like(image, dtype=np.float32)
-    grad_y = np.zeros_like(image, dtype=np.float32)
+    grad_x = np.zeros_like(image)
+    grad_y = np.zeros_like(image)
 
     for i in range(rows):
         for j in range(cols):
@@ -26,46 +26,62 @@ def gradient_intensity(image):
             grad_y[i, j] = np.sum(roi * sobel_y)
 
     vector_length = np.sqrt(grad_x**2+grad_y**2)
-    difference_way = np.arctan2(grad_y, grad_x)
-    return vector_length, difference_way
+    vector_angle = np.tan(grad_y, grad_x)
+    return vector_length, vector_angle
 
-def non_maximum_suppression(vec_lenght, dif_way):
-    suppressed = np.zeros_like(vec_lenght, dtype=np.float32)
-    angle = dif_way * 180.0 / np.pi
+def non_maximum_suppression(vec_lenght, vec_angle):
+    suppressed = np.zeros_like(vec_lenght)
+    angle = vec_angle * 180.0 / np.pi
     angle[angle < 0] += 180
 
     for i in range(1, vec_lenght.shape[0] - 1):
-        for j in range(1, dif_way.shape[1] - 1):
+        for j in range(1, vec_angle.shape[1] - 1):
             q = 255
             r = 255
-
+            #сравнение длины градиента каждого пикселя с его соседями
+            #(если он не максимальный, то обнуляем для четких)
             if (0 <= angle[i, j] < 22.5) or (157.5 <= angle[i, j] <= 180):
-                q = vec_lenght[i, j + 1]
-                r = vec_lenght[i, j - 1]
+                q = vec_lenght[i, j + 1] #правый сосед
+                r = vec_lenght[i, j - 1] #левый сосед
             elif 22.5 <= angle[i, j] < 67.5:
-                q = vec_lenght[i + 1, j - 1]
-                r = vec_lenght[i - 1, j + 1]
+                q = vec_lenght[i + 1, j - 1] #нижний-левый
+                r = vec_lenght[i - 1, j + 1] #верхний-правый
             elif 67.5 <= angle[i, j] < 112.5:
-                q = vec_lenght[i + 1, j]
-                r = vec_lenght[i - 1, j]
+                q = vec_lenght[i + 1, j] #нижний сосед
+                r = vec_lenght[i - 1, j] #верхний сосед
             elif 112.5 <= angle[i, j] < 157.5:
-                q = vec_lenght[i - 1, j - 1]
-                r = vec_lenght[i + 1, j + 1]
+                q = vec_lenght[i - 1, j - 1] #верзний-правый
+                r = vec_lenght[i + 1, j + 1] #нижний-правый
 
             if vec_lenght[i, j] >= q and vec_lenght[i, j] >= r:
                 suppressed[i, j] = vec_lenght[i, j]
             else:
                 suppressed[i, j] = 0
 
-    return suppressed
+    max_grad = np.max(suppressed)
+    low_level = max_grad // 15
+    high_level = max_grad // 8
+
+    return suppressed, low_level, high_level
+
+def double_threshold(suppressed_image, low_level, high_level):
+    strong = suppressed_image >= high_level
+    weak = (suppressed_image >= low_level) & (suppressed_image < high_level)
+
+    edges = np.zeros_like(suppressed_image, dtype=np.uint8)
+    edges[strong] = 255
+    edges[weak] = 75
+    return edges
 
 if __name__ == "__main__":
     image = cv.imread("lab4/input/gelenzhik.jpg")
     image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     sigma, size = 1,3
     filtered_image = cv.GaussianBlur(image, (size, size), sigma)
-    vector_length, difference_way = gradient_intensity(filtered_image)
-
+    vector_length, vector_angle = gradient_intensity(filtered_image)
+    suppressed_image, low_lvl, high_lvl = non_maximum_suppression(vector_length, vector_angle)
+    ways = double_threshold(suppressed_image, low_lvl, high_lvl)
+    
 
     cv.namedWindow('Original', cv.WINDOW_FREERATIO)
     cv.namedWindow('Gaussian Filtered', cv.WINDOW_FREERATIO)
