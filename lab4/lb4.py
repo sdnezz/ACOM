@@ -59,9 +59,9 @@ def non_maximum_suppression(vec_lenght, vec_angle):
                 suppressed[i, j] = 0
 
     max_grad = np.max(suppressed)
-    low_level = max_grad // 15
-    high_level = max_grad // 8
-
+    low_level = max_grad // 20
+    high_level = max_grad // 2.5
+    print(low_level, high_level)
     return suppressed, low_level, high_level
 
 def double_threshold(suppressed_image, low_level, high_level):
@@ -73,17 +73,17 @@ def double_threshold(suppressed_image, low_level, high_level):
     ways[weak] = 75
     return ways
 
-def hysteresis(edges):
-    rows, cols = edges.shape
+def hysteresis(ways):
+    rows, cols = ways.shape
     for i in range(1, rows - 1):
         for j in range(1, cols - 1):
-            if edges[i, j] == 75:
-                if np.any(edges[i-1 : i+2, j-1 : j+2] == 255):
-                    edges[i, j] = 255
+            if ways[i, j] == 75:
+                if np.any(ways[i-1 : i+2, j-1 : j+2] == 255):
+                    ways[i, j] = 255
                 else:
-                    edges[i, j] = 0
+                    ways[i, j] = 0
 
-    return edges
+    return ways
 
 if __name__ == "__main__":
     image = cv.imread("lab4/input/gelenzhik.jpg")
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     edges = hysteresis(ways)
 
     cv.imwrite("lab4/output/Canny_detect-gelenzhik.jpg", edges)
-    cv.imwrite("lab4/output/cv_canny-gelenzhik.jpg", cv.Canny(image, 100, 150))
+    cv.imwrite("lab4/output/cv_canny-gelenzhik.jpg", cv.Canny(image, 400, 500))
     image_canny = cv.imread("lab4/output/Canny_detect-gelenzhik.jpg")
     image_canny_cv = cv.imread("lab4/output/cv_canny-gelenzhik.jpg")
     cv.namedWindow('Original', cv.WINDOW_FREERATIO)

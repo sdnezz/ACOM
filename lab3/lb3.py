@@ -14,7 +14,7 @@ def gaussian_kernel(size, sigma):
             kernel[i, j] = (1/(2*math.pi*sigma**2))*math.exp(-(x**2+y**2)/(2 * sigma**2))
 
     kernel /= kernel.sum()
-    kernel = kernel / kernel.sum()
+    kernel /= kernel.sum()
     print(kernel.sum())
     return kernel
 
@@ -35,16 +35,19 @@ def apply_gaussian_filter(image, kernel):
 
 
 if __name__ == "__main__":
-    for size in [3, 7]:
-        for sigma in [1, 3]:
+    for size in [3]:
+        for sigma in [1]:
             kernel = gaussian_kernel(size, sigma=sigma)
             print(f"Гауссова матрица для размера {size}x{size} и сигмы {sigma}:\n", kernel)
 
             image = cv.imread("lab1/input/tytuta.jpg", cv.IMREAD_GRAYSCALE)
             filtered_image = apply_gaussian_filter(image, kernel)
             filtered_image_opencv = cv.GaussianBlur(image, (size, size), sigma)
+            cv.namedWindow('Original', cv.WINDOW_FREERATIO)
+            cv.namedWindow('Gaussian Filtered', cv.WINDOW_FREERATIO)
+            cv.namedWindow('Gaussian Filtered (OpenCV)', cv.WINDOW_FREERATIO)
             cv.imshow("Original", image)
             cv.imshow("Gaussian Filtered", filtered_image)
             cv.imshow("Gaussian Filtered (OpenCV)", filtered_image_opencv)
-        cv.waitKey(0)
-        cv.destroyAllWindows()
+            cv.waitKey(0)
+            cv.destroyAllWindows()
