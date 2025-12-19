@@ -73,5 +73,7 @@ finish = time.time() - start
 print(finish)
 
 
-
+# Сохраняем модель под именем, которое ожидает интерфейс
+cnn_model.save('CNN.keras')
+print("Модель CNN сохранена как 'CNN.keras'")
 plot_history(history_extended)
